@@ -28,10 +28,12 @@ class MovieAdapter(private val clickListener: MovieClickListener) :
         holder.itemView.setOnClickListener { clickListener.onMovieClick(movie) }
     }
 
-    fun addMovies(movieList: List<Movie>) {
+    fun setMovies(movieList: List<Movie>) {
+        movies.clear()
         movies.addAll(movieList)
-        notifyItemRangeInserted(0, movieList.size)
+        notifyDataSetChanged()
     }
+
 
     class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageUrl = "https://image.tmdb.org/t/p/w185/"
@@ -45,10 +47,19 @@ class MovieAdapter(private val clickListener: MovieClickListener) :
         fun bind(movie: Movie) {
             titleText.text = movie.title
 
+            val fullUrl =
+                if (!movie.posterPath.isNullOrEmpty()) "$imageUrl${movie.posterPath}"
+                else null
+
+            Glide.with(itemView.context)
+                .load(fullUrl)
+                .placeholder(R.drawable.ic_no_image)
+                .into(poster)
+
             Glide.with(itemView.context)
                 .load("$imageUrl${movie.posterPath}")
-                .placeholder(R.mipmap.ic_launcher)
-                .fitCenter()
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(poster)
         }
     }
