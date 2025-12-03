@@ -1,0 +1,128 @@
+Kelvin Jonathan Setiawan
+00000077881
+================================
+
+Soal 1
+Why is MVVM important? Which files represent Model, which files represent View, and which files represent ViewModel?
+-- Jawab --
+Mengapa MVVM penting:
+- MVVM memisahkan UI (View) dari logic dan data (Model + ViewModel) sehingga kode lebih terstruktur.
+- View tidak langsung mengelola data, melainkan hanya mengamati data dari ViewModel.
+- Memudahkan maintenance, testing, dan mencegah Activity menjadi terlalu besar (god object).
+- ViewModel tetap hidup melewati perubahan konfigurasi (misal rotate screen), sehingga data tidak hilang.
+
+Model (data & sumber data):
+- Movie.kt
+- PopularMoviesResponse.kt
+- MovieDao.kt
+- MovieDatabase.kt
+- MovieRepository.kt (bagian dari model layer karena mengelola sumber data API + DB)
+
+View (UI):
+- MainActivity.kt
+- DetailsActivity.kt
+- activity_main.xml
+- view_movie_item.xml
+- RecyclerViewBinding.kt
+- MovieAdapter.kt
+
+ViewModel (logic penghubung View <-> Repository):
+- MovieViewModel.kt
+
+
+Soal 2
+In Part 1, you implemented Data Binding, why is this more efficient than using the normal method?
+-- Jawab --
+Tanpa Data Binding, kita harus:
+- memanggil findViewById
+- mengupdate UI secara manual di Activity setiap ada data baru
+- banyak boilerplate code
+
+Dengan Data Binding:
+- View otomatis update ketika data berubah (observasi terjadi otomatis)
+- Mengurangi kode di Activity/Fragment
+- Mengurangi potensi crash karena null view
+- Hubungan antara layout dan data menjadi lebih deklaratif (langsung di XML)
+
+Hasilnya:
+- Lebih cepat
+- Lebih aman
+- Lebih sedikit kode
+- Lebih efisien untuk lifecycle Android
+
+
+Soal 3
+In Part 2, you implemented the Singleton Pattern, why is this important?
+-- Jawab --
+Singleton digunakan pada objek seperti:
+- MovieDatabase
+- MovieRepository
+
+Alasannya:
+Beberapa komponen seperti Room Database harus hanya memiliki SATU instance dalam seluruh aplikasi.
+
+Jika ada lebih dari satu instance database:
+- Bersiko terjadi race condition
+- Data korup
+- Penggunaan memori berlebihan
+- Thread conflict
+
+Dengan Singleton:
+- Hanya ada satu instance global yang aman
+- Efisiensi memori
+- Konsistensi data
+- Lebih mudah digunakan di banyak tempat
+
+
+Soal 4
+In Part 2 & 3, you implemented the Repository Pattern, why is this important?
+-- Jawab --
+Repository Pattern berfungsi sebagai jembatan antara ViewModel dan sumber data, misalnya:
+- API (network)
+- Database (Room)
+- Cache lokal
+- Repository mengabstraksi “dari mana data berasal”.
+
+Manfaatnya:
+- ViewModel tidak perlu tahu apakah data dari API atau database.
+- Jika nanti ingin ganti API / ganti database -> cukup edit Repository, bukan ViewModel.
+- Memudahkan testing: Repository bisa di-mock.
+- Mencegah logic bisnis tercecer di Activity/Fragment.
+
+Singkatnya:
+- Memisahkan logic data dari UI
+- Mempermudah testing
+- Meningkatkan fleksibilitas aplikasi
+
+
+Soal 5
+In part 3, you implemented the Worker Manager, is there another way to refresh your database with the latest data other than using Worker?
+-- Jawab --
+Ya, ada beberapa cara lain:
+
+a. ViewModel + Coroutine
+Saat aplikasi dibuka, ViewModel bisa memanggil Repository untuk refresh data.
+
+b. Pull-to-refresh
+Pengguna menarik layar untuk meminta data terbaru.
+
+c. Manual background thread / coroutine periodic
+Menggunakan:
+- Handler
+- Coroutine dengan delay() -> (tidak direkomendasikan karena kurang andal dan tidak survive reboot)
+
+d. AlarmManager
+Bisa menjadwalkan refresh berkala, tetapi lebih cocok untuk task sederhana.
+
+e. Firebase Realtime Updates
+Jika backend mendukung, database bisa update otomatis ketika ada perubahan.
+
+f. App Startup Trigger
+Setiap kali aplikasi dibuka → otomatis cek dan update data.
+
+Kenapa WorkManager tetap pilihan terbaik?
+Karena WorkManager bisa:
+- Dijalankan berkala
+- Survive device restart
+- Sesuai kebijakan OS (Doze mode)
+- Tidak membunuh baterai
